@@ -1,153 +1,155 @@
-/* src/pages/Home.module.css */
+/* Configurações Gerais */
 .container {
-  padding: 2.5rem;
-  animation: fadeIn 0.5s ease;
+  padding: 2rem;
+  background-color: #f8fafc; /* Fundo levemente acinzentado para destacar os cards */
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── Cabeçalho ── */
 .header {
-  margin-bottom: 2.5rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 1rem;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
 }
 
 .title {
-  font-size: 1.875rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1e293b;
   margin: 0;
 }
 
 .date {
-  color: var(--text-light);
-  font-size: 0.875rem;
-  text-transform: capitalize;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
-/* ── Grids ── */
+/* Grids */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .statsGridSecondary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
 }
 
-/* ── Stat Card ── */
+/* Estilo Base do Card */
 .statCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: var(--shadow);
-  border: 1px solid transparent;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
 }
 
 .statCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
-.statIcon {
-  font-size: 2rem;
-  line-height: 1;
-  flex-shrink: 0;
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.35);
-}
+/* Variantes de Borda Superior (Top) */
+.blueTop   { border-top: 6px solid #3b82f6; }
+.orangeTop { border-top: 6px solid #f97316; }
+.greenTop  { border-top: 6px solid #22c55e; }
+.purpleTop { border-top: 6px solid #a855f7; }
 
-.statInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
+/* Variantes de Borda Lateral (Left) */
+.blueLeft   { border-left: 6px solid #3b82f6; }
+.orangeLeft { border-left: 6px solid #f97316; }
+.greenLeft  { border-left: 6px solid #22c55e; }
 
-.statLabel {
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.8;
-}
-
-.statValue {
-  font-size: 1.75rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.statUnit {
-  font-size: 0.95rem;
-  font-weight: 500;
-  opacity: 0.75;
-}
-
-/* ── Cores dos cards ── */
-.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-.orange { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
-.green  { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
-.purple { background: linear-gradient(135deg, #a855f7, #9333ea); color: white; }
-.teal   { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; }
-.indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
-.gray   { background: linear-gradient(135deg, #64748b, #475569); color: white; }
-
-/* ── Gráfico ── */
-.mainContent {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-.chartSection {
+/* Barra de Progresso */
+.progressSection {
+  background: white;
   padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.progressTrack {
+  height: 12px;
+  background-color: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #0ea5e9;
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Seção do Gráfico */
+.chartSection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .chartTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin: 0 0 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
 }
 
-/* ── Loader ── */
 .loader {
-  padding: 4rem;
-  text-align: center;
-  color: var(--text-light);
-  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #64748b;
 }
 
-/* ── Responsivo ── */
-@media (max-width: 1024px) {
-  .statsGrid          { grid-template-columns: repeat(2, 1fr); }
-  .statsGridSecondary { grid-template-columns: repeat(3, 1fr); }
+/* Adicione isso ao final do seu Home.module.css */
+
+.spin {
+  animation: rotation 8s infinite linear;
 }
 
-@media (max-width: 768px) {
-  .container          { padding: 1.5rem; }
-  .statsGrid          { grid-template-columns: repeat(2, 1fr); }
-  .statsGridSecondary { grid-template-columns: repeat(2, 1fr); }
+@keyframes rotation {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(359deg); }
+}
+
+/* Ajuste no container do ícone dentro do Card.module.css se desejar fundo colorido suave */
+.iconContainer {
+  background-color: rgba(0, 0, 0, 0.02); /* Fundo quase imperceptível */
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Responsividade */
+@media (max-width: 1026px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .statsGrid, .statsGridSecondary { grid-template-columns: 1fr; }
+  .header { flex-direction: column; align-items: flex-start; }
 }
 
 @media (max-width: 480px) {

@@ -8,6 +8,7 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  variant?: "default" | "warning" | "danger";
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -16,13 +17,20 @@ const Modal: React.FC<ModalProps> = ({
   title,
   children,
   footer,
+  variant = "default",
 }) => {
   if (!isOpen) return null;
+
+  const headerClass = [
+    styles.header,
+    variant === "warning" ? styles.headerWarning : "",
+    variant === "danger" ? styles.headerDanger : "",
+  ].join(" ");
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
+        <div className={headerClass}>
           <h2 className={styles.title}>{title}</h2>
           <Button
             variant="outline"

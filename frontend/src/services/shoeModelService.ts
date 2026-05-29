@@ -1,6 +1,17 @@
 import api from "./api";
 import { ShoeModel } from "../types/shoeModel";
 
+/**
+ * DTO correto para criação (somente campos permitidos)
+ */
+export type CreateShoeModelDTO = {
+  name: string;
+  category: string;
+  base_cost: number;
+};
+
+export type UpdateShoeModelDTO = Partial<CreateShoeModelDTO>;
+
 export const ShoeModelService = {
   findAll: async (): Promise<ShoeModel[]> => {
     const { data } = await api.get("/models");
@@ -8,9 +19,7 @@ export const ShoeModelService = {
     return data.data ?? data;
   },
 
-  create: async (
-    payload: Omit<ShoeModel, "id" | "created_at">
-  ): Promise<ShoeModel> => {
+  create: async (payload: CreateShoeModelDTO): Promise<ShoeModel> => {
     const { data } = await api.post("/models", payload);
 
     return data.data ?? data;
@@ -18,7 +27,7 @@ export const ShoeModelService = {
 
   update: async (
     id: string,
-    payload: Partial<ShoeModel>
+    payload: UpdateShoeModelDTO
   ): Promise<ShoeModel> => {
     const { data } = await api.put(`/models/${id}`, payload);
 

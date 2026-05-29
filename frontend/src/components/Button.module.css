@@ -21,20 +21,26 @@
   color: white;
 }
 .primary:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #00a3f5;
+  transform: translateY(-2px);
 }
 
 .danger {
-  background-color: #ef4444;
+  background-color: #d90b0b;
   color: white;
 }
 .danger:hover:not(:disabled) {
-  background-color: #dc2626;
+  background-color: #ff2020;
+  transform: translateY(-2px);
 }
 
 .success {
-  background-color: #22c55e;
+  background-color: #1dc059;
   color: white;
+}
+.success:hover {
+  background-color: #25e26a;
+  transform: translateY(-2px);
 }
 
 .outline {
@@ -43,7 +49,8 @@
   color: var(--text-main);
 }
 .outline:hover:not(:disabled) {
-  background-color: #f1f5f9;
+  transform: translateY(-2px);
+  background-color: white;
 }
 
 /* Tamanhos */

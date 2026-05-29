@@ -7,37 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  password   String
-  role       Role
-  created_at DateTime @default(now())
-}
-
-model ShoeModel {
-  id                String            @id // ex: SAP-SPORT-001
-  name              String
-  category          String
-  base_cost         Float
-  created_at        DateTime          @default(now())
-  production_orders ProductionOrder[]
-}
-
-model ProductionOrder {
-  id                String     @id // ex: OP-2025-001
-  model_id          String
-  size              Int
-  quantity_planned  Int
-  quantity_produced Int        @default(0)
-  status            Status     @default(PLANNED)
-  start_date        DateTime?
-  end_date          DateTime?
-  created_at        DateTime   @default(now())
-  model             ShoeModel  @relation(fields: [model_id], references: [id])
-}
-
 enum Role {
   ADMIN
   OPERATOR
@@ -47,4 +16,83 @@ enum Status {
   PLANNED
   IN_PROGRESS
   COMPLETED
+  CANCELLED
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  logs       AuditLog[]
+}
+
+model ShoeModel {
+  id         String   @id
+  name       String
+  category   String
+  base_cost  Float
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  variants   ShoeVariant[]
+}
+
+model ShoeVariant {
+  id          String   @id @default(uuid())
+  model_id    String
+  color       String
+  sole_color  String
+  sku         String   @unique
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  model       ShoeModel @relation(fields: [model_id], references: [id])
+  productions ProductionOrder[]
+  stocks      Stock[]
+}
+
+model Size {
+  id    String @id @default(uuid())
+  value Int    @unique
+  stocks Stock[]
+  productions ProductionOrder[]
+}
+
+model Stock {
+  id          String   @id @default(uuid())
+  variant_id  String
+  size_id     String
+  quantity    Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  variant     ShoeVariant @relation(fields: [variant_id], references: [id])
+  size        Size        @relation(fields: [size_id], references: [id])
+  @@unique([variant_id, size_id])
+}
+
+model ProductionOrder {
+  id                 String   @id
+  variant_id         String
+  size_id            String
+  quantity_planned   Int
+  quantity_produced  Int      @default(0)
+  status             Status   @default(PLANNED)
+  start_date         DateTime?
+  end_date           DateTime?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  variant            ShoeVariant @relation(fields: [variant_id], references: [id])
+  size               Size        @relation(fields: [size_id], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user_id    String?
+  action     String
+  entity     String
+  entity_id  String
+  created_at DateTime @default(now())
+  user       User? @relation(fields: [user_id], references: [id])
 }

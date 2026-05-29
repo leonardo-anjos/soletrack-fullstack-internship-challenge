@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
-import { useAuth } from "../hooks/useAuth";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import Input from "../components/Input";
@@ -19,7 +18,6 @@ interface RegisterForm {
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
 
   const [form, setForm] = useState<RegisterForm>({
     name: "",
@@ -36,7 +34,7 @@ const Register: React.FC = () => {
     setLoading(true);
     setStatus({ msg: "", type: "" });
     try {
-      await AuthService.register(form, token || "");
+      await AuthService.register(form);
       setStatus({ msg: "Operador registrado com sucesso!", type: "success" });
       setTimeout(() => navigate("/login"), 1500);
     } catch (err: any) {

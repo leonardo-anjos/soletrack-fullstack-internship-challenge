@@ -2,61 +2,72 @@ import { Request, Response, NextFunction } from "express";
 import { ProductionOrderService } from "../services/productionOrder.service";
 import { z } from "zod";
 import { Status } from "@prisma/client";
+import { AppError } from "../errors/AppError";
 
 const service = new ProductionOrderService();
 
 /**
- * VALIDATIONS
+ * SCHEMAS
  */
 const idSchema = z.object({
   id: z.string().min(1),
 });
 
+const createSchema = z.object({
+  model_id: z.string().min(1),
+  color: z.string().min(1),
+  sole_color: z.string().min(1),
+  size: z.number().int().min(34).max(44),
+  quantity_planned: z.number().int().positive(),
+});
+
 const updateProducedSchema = z.object({
-  quantity: z.number().positive(),
+  quantity: z.number().int().positive(),
 });
 
 const statusSchema = z.object({
   status: z.nativeEnum(Status),
 });
 
+const querySchema = z.object({
+  status: z.nativeEnum(Status).optional(),
+});
+
+/**
+ * CONTROLLER
+ */
 export class ProductionOrderController {
-  /**
-   * CREATE
-   */
-  async create(req: Request, res: Response, next: NextFunction) {
+  create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const order = await service.create(req.body);
+      const data = createSchema.parse(req.body);
+
+      const order = await service.create(data);
 
       return res.status(201).json({
-        status: "success",
+        success: true,
         data: order,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  /**
-   * FIND ALL
-   */
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const orders = await service.findAll();
+      const { status } = querySchema.parse(req.query);
+
+      const orders = await service.findAll(status);
 
       return res.json({
-        status: "success",
+        success: true,
         data: orders,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  /**
-   * UPDATE PRODUCED (REGRA AGORA NO SERVICE)
-   */
-  async updateProduced(req: Request, res: Response, next: NextFunction) {
+  updateProduced = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = idSchema.parse(req.params);
       const { quantity } = updateProducedSchema.parse(req.body);
@@ -64,36 +75,30 @@ export class ProductionOrderController {
       const order = await service.updateProduced(id, quantity);
 
       return res.json({
-        status: "success",
+        success: true,
         data: order,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  /**
-   * RESET
-   */
-  async resetProduction(req: Request, res: Response, next: NextFunction) {
+  reset = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = idSchema.parse(req.params);
 
       const order = await service.reset(id);
 
       return res.json({
-        status: "success",
+        success: true,
         data: order,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  /**
-   * UPDATE STATUS (VALIDADO)
-   */
-  async updateStatus(req: Request, res: Response, next: NextFunction) {
+  updateStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = idSchema.parse(req.params);
       const { status } = statusSchema.parse(req.body);
@@ -101,18 +106,15 @@ export class ProductionOrderController {
       const order = await service.updateStatus(id, status);
 
       return res.json({
-        status: "success",
+        success: true,
         data: order,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  /**
-   * DELETE
-   */
-  async delete(req: Request, res: Response, next: NextFunction) {
+  delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = idSchema.parse(req.params);
 
@@ -122,34 +124,39 @@ export class ProductionOrderController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  /**
-   * DASHBOARD (OTIMIZADO)
-   */
-  async dashboard(req: Request, res: Response, next: NextFunction) {
+  dashboard = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orders = await service.findAll();
 
       const today = new Date().toISOString().split("T")[0];
 
-      const dashboardData = orders.reduce(
+      const data = orders.reduce(
         (acc, order) => {
-          const orderDate = order.created_at
+          const createdDate = order.created_at
             ? new Date(order.created_at).toISOString().split("T")[0]
             : null;
 
-          if (orderDate === today) {
+          if (createdDate === today) {
             acc.producedToday += order.quantity_produced;
           }
 
           acc.totalProduced += order.quantity_produced;
-          acc.totalMeta += order.quantity_planned;
-          acc.totalOrders += 1;
+          acc.totalPlanned += order.quantity_planned;
+          acc.totalOrders++;
 
-          if (order.status === Status.IN_PROGRESS) acc.inProduction += 1;
-          if (order.status === Status.COMPLETED) acc.completed += 1;
-          if (order.status === Status.PLANNED) acc.planned += 1;
+          switch (order.status) {
+            case Status.IN_PROGRESS:
+              acc.inProduction++;
+              break;
+            case Status.COMPLETED:
+              acc.completed++;
+              break;
+            case Status.PLANNED:
+              acc.planned++;
+              break;
+          }
 
           return acc;
         },
@@ -159,17 +166,17 @@ export class ProductionOrderController {
           completed: 0,
           planned: 0,
           totalProduced: 0,
-          totalMeta: 0,
+          totalPlanned: 0,
           totalOrders: 0,
         }
       );
 
       return res.json({
-        status: "success",
-        data: dashboardData,
+        success: true,
+        data,
       });
     } catch (error) {
       next(error);
     }
-  }
+  };
 }

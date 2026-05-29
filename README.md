@@ -1,50 +1,50 @@
 # 🥿 SoleTrack
 
-> Sistema Fullstack de Controle de Produção de Calçados
+**Sistema Fullstack de Controle de Produção de Calçados**
 
-SoleTrack é uma aplicação **fullstack** para gerenciar a produção de calçados em ambiente industrial. Oferece controle de usuários, pedidos de produção e modelos de calçados, com autenticação JWT e controle de acesso baseado em perfis.
-
----
-
-## 📋 Índice
-
-- [Funcionalidades](#-funcionalidades)
-- [Tecnologias](#-tecnologias)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Pré-requisitos](#-pré-requisitos)
-- [Configuração do Ambiente](#-configuração-do-ambiente)
-- [Como Rodar](#-como-rodar)
-- [Documentação da API](#-documentação-da-api)
-- [Perfis de Acesso](#-perfis-de-acesso)
+SoleTrack é um sistema fullstack para gerenciamento de produção de calçados em ambiente industrial. Ele permite o controle de usuários, modelos de calçados e ordens de produção, com autenticação JWT e controle de acesso baseado em perfis.
 
 ---
 
-## 🚀 Funcionalidades
+# 📌 Funcionalidades
 
-- ✅ Cadastro e autenticação de usuários com JWT
-- ✅ Controle de acesso por perfil (**ADMIN** e **OPERATOR**)
-- ✅ Atualização de perfil de usuário
-- ✅ Gestão completa de pedidos de produção
-- ✅ Gestão de modelos de calçados
-- ✅ Dashboard com visualização de dados
-- ✅ Rotas públicas e privadas
-- ✅ Documentação interativa da API com Swagger
-
----
-
-## 💻 Tecnologias
-
-| Camada | Tecnologias |
-|--------|-------------|
-| **Frontend** | React, TypeScript, Vite, React Router, Axios, CSS Modules |
-| **Backend** | Node.js, Express, TypeScript, Prisma ORM, JWT, Swagger |
-| **Banco de Dados** | PostgreSQL |
+- 🔐 Autenticação de usuários com JWT
+- 👥 Controle de acesso por perfil (**ADMIN** e **OPERATOR**)
+- 👤 Atualização de perfil de usuário
+- 📦 Gestão completa de ordens de produção
+- 👟 Gestão de modelos de calçados
+- 📊 Dashboard com métricas em tempo real
+- 🔒 Rotas protegidas (frontend e backend)
+- 📖 Documentação da API com Swagger
 
 ---
 
-## 📂 Estrutura do Projeto
+# 🧠 Tecnologias
 
-```
+## Frontend
+- React
+- TypeScript
+- Vite
+- React Router
+- Axios
+- CSS Modules
+
+## Backend
+- Node.js
+- Express
+- TypeScript
+- Prisma ORM
+- JWT
+- Swagger
+
+## Banco de Dados
+- PostgreSQL
+
+---
+
+# 📁 Estrutura do Projeto
+
+```bash
 soletrack-fullstack/
 ├── backend/
 │   ├── prisma/
@@ -76,99 +76,66 @@ soletrack-fullstack/
         └── main.tsx
 ```
 
----
-
-## ⚙️ Pré-requisitos
-
-- [Node.js](https://nodejs.org/) >= 18
-- [npm](https://www.npmjs.com/) >= 9
-- [PostgreSQL](https://www.postgresql.org/) >= 14
 
 ---
 
-## 🔧 Configuração do Ambiente
+# ⚙️ Pré-requisitos
 
-### 1. Clone o repositório
+- Node.js >= 18
+- npm >= 9
+- PostgreSQL >= 14
+
+---
+
+# 🔧 Configuração do Ambiente
+
+## 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/seu-usuario/soletrack-fullstack.git
 cd soletrack-fullstack
-```
 
-### 2. Configure o banco de dados
-
-Acesse o PostgreSQL e crie o banco:
-
-```sql
+2. Criar o banco de dados
 CREATE DATABASE shoetrack_production;
-```
 
-### 3. Configure as variáveis de ambiente
-
-Na pasta `backend`, copie o arquivo de exemplo e preencha com suas credenciais:
-
-```bash
+3. Configurar variáveis de ambiente no backend, copie o arquivo de exemplo:
 cd backend
 cp .env.example .env
-```
 
-**.env.example:**
-
-```env
+Exemplo de .env
 DATABASE_URL="postgresql://user:password@localhost:5432/shoetrack_production"
 JWT_SECRET="your_jwt_secret_here"
 PORT=3000
 FRONTEND_URL="http://localhost:5173"
-```
 
----
+Como executar o projeto
 
-## ▶️ Como Rodar
+O projeto precisa de dois terminais rodando simultaneamente.
 
-O projeto requer **dois terminais** rodando simultaneamente.
-
-### Terminal 1 — Backend
-
-```bash
+🔹 Backend
 cd backend
 npm install
-npm run migrate   # Cria as tabelas via Prisma
+npm run migrate
 npm run dev
-```
 
-Servidor disponível em: `http://localhost:3000`
+Servidor:
 
-### Terminal 2 — Frontend
-
-```bash
+http://localhost:3000
+🔹 Frontend
 cd frontend
 npm install
 npm run dev
-```
 
-Aplicação disponível em: `http://localhost:5173`
+Aplicação:
+http://localhost:5173
 
-### Scripts disponíveis (backend)
+Documentação da API
 
-| Script | Descrição |
-|--------|-----------|
-| `npm run dev` | Inicia o servidor em modo desenvolvimento |
-| `npm run build` | Compila o projeto TypeScript |
-| `npm run migrate` | Executa as migrations do Prisma |
+Após iniciar o backend:
 
----
-
-## 📖 Documentação da API
-
-A documentação interativa (Swagger) está disponível após iniciar o backend:
-
-```
 http://localhost:3000/api-docs
-```
-
-### Formato da resposta de autenticação
-
-```json
+🔐 Autenticação
+Exemplo de resposta
 {
   "token": "string",
   "user": {
@@ -177,19 +144,28 @@ http://localhost:3000/api-docs
     "role": "ADMIN | OPERATOR"
   }
 }
-```
 
----
+Perfis de acesso
+Perfil	Permissões
+ADMIN	Acesso total ao sistema (usuários, ordens e modelos)
+OPERATOR	Acesso às operações de produção
 
-## 🔐 Perfis de Acesso
+📊 Módulos do sistema
+📦 Ordens de Produção
+Criar ordens
+Atualizar produção
+Reiniciar produção
+Excluir ordens (com regras de status)
 
-| Perfil | Permissões |
-|--------|------------|
-| **ADMIN** | Acesso completo: usuários, pedidos e modelos |
-| **OPERATOR** | Acesso restrito às operações de produção |
+👟 Modelos de Calçados
+Cadastro e listagem de modelos
 
----
+📊 Dashboard
+Produção total
+Produção diária
+Status de ordens
+Progresso geral
+👨‍💻 Autor
 
-## 👨‍💻 Autor
-
-Desenvolvido por **Carlos Otacílio Rodrigues Dos Anjos** como desafio técnico fullstack, demonstrando integração entre frontend, backend, autenticação segura e banco de dados relacional.
+Desenvolvido por Carlos Otacílio Rodrigues dos Anjos
+Projeto fullstack demonstrando integração entre frontend, backend, autenticação JWT, ORM e banco de dados relacional.

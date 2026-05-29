@@ -7,22 +7,23 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import styles from "./ShoeModels.module.css";
 
+const CATEGORIES = ["Tênis", "Social", "Sandália", "Bota"];
+
 const ShoeModels: React.FC = () => {
   const [models, setModels] = useState<ShoeModel[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
-    category: "",
+    category: "Tênis",
     base_cost: 0,
-    production_time_minutes: 0,
   });
 
   const fetchModels = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const data = await ShoeModelService.findAll();
-      setModels(data);
+      setModels(data || []);
     } catch (err) {
       console.error("Erro ao buscar modelos", err);
     } finally {
@@ -36,23 +37,31 @@ const ShoeModels: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.category) return;
+
+    if (!formData.name.trim()) return;
+
     try {
-      await ShoeModelService.create(formData);
+      await ShoeModelService.create({
+        name: formData.name,
+        category: formData.category,
+        base_cost: Number(formData.base_cost),
+      });
+
       setFormData({
         name: "",
-        category: "",
+        category: "Tênis",
         base_cost: 0,
-        production_time_minutes: 0,
       });
-      fetchModels();
+
+      await fetchModels();
     } catch (err) {
-      alert("Erro ao salvar modelo. Verifique se você é ADMIN.");
+      alert("Erro ao salvar modelo. Verifique permissões.");
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Tem certeza que deseja excluir este modelo?")) return;
+
     try {
       await ShoeModelService.delete(id);
       setModels((prev) => prev.filter((m) => m.id !== id));
@@ -74,58 +83,79 @@ const ShoeModels: React.FC = () => {
     <div className={styles.container}>
       <h1 className={styles.title}>Modelos de Calçados</h1>
 
-      <Card className={styles.formCard} accentColor>
+      {/* FORM CARD */}
+      <Card className={styles.formCard}>
         <form onSubmit={handleSave} className={styles.row}>
           <Input
             label="Nome"
             value={formData.name}
-            onChange={(v) => setFormData({ ...formData, name: v })}
+            onChange={(v) =>
+              setFormData((prev) => ({ ...prev, name: v }))
+            }
             required
           />
-          <Input
-            label="Categoria"
-            value={formData.category}
-            onChange={(v) => setFormData({ ...formData, category: v })}
-            required
-          />
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <label style={{ fontSize: 13, fontWeight: 500 }}>
+              Categoria
+            </label>
+
+            <select
+              value={formData.category}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  category: e.target.value,
+                }))
+              }
+              style={{
+                padding: "8px 12px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                fontSize: 14,
+                height: 38,
+              }}
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <Input
             label="Custo Base (R$)"
             type="number"
             value={formData.base_cost}
-            onChange={(v) => setFormData({ ...formData, base_cost: Number(v) })}
-            required
-          />
-          <Input
-            label="Tempo de produção (min por par)"
-            type="number"
-            value={formData.production_time_minutes}
             onChange={(v) =>
-              setFormData({ ...formData, production_time_minutes: Number(v) })
+              setFormData((prev) => ({
+                ...prev,
+                base_cost: Number(v),
+              }))
             }
             required
           />
+
           <Button type="submit" className={styles.btn}>
             Salvar Modelo
           </Button>
         </form>
       </Card>
 
+      {/* TABLE */}
       <Table
+        data={models}
         columns={[
           { header: "Nome", accessor: "name" },
           { header: "Categoria", accessor: "category" },
           {
             header: "Custo Base",
-            accessor: "base_cost",
-            render: (row: ShoeModel) => `R$ ${row.base_cost.toFixed(2)}`,
-          },
-          {
-            header: "Tempo (min)",
-            accessor: "production_time_minutes",
+            render: (row: ShoeModel) =>
+              `R$ ${Number(row.base_cost || 0).toFixed(2)}`,
           },
           {
             header: "Ações",
-            accessor: "id",
             render: (row: ShoeModel) => (
               <Button
                 variant="danger"
@@ -137,7 +167,6 @@ const ShoeModels: React.FC = () => {
             ),
           },
         ]}
-        data={models}
       />
     </div>
   );

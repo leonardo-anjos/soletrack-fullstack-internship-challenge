@@ -1,40 +1,77 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import {
   listUsers,
   deleteUser,
   updateUserRole,
 } from "../services/users.service";
+import { z } from "zod";
 
-export const getUsers = async (_req: Request, res: Response) => {
-  const users = await listUsers();
-  res.json(users);
+/**
+ * SCHEMAS
+ */
+const idSchema = z.object({
+  id: z.string().uuid(),
+});
+
+const roleSchema = z.object({
+  role: z.enum(["ADMIN", "OPERATOR"]),
+});
+
+/**
+ * CONTROLLERS
+ */
+export const getUsers = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const users = await listUsers();
+
+    return res.json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const removeUser = async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const removeUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = idSchema.parse(req.params);
 
-  if (!id || Array.isArray(id)) {
-    return res.status(400).json({ message: "ID inválido" });
+    await deleteUser(id);
+
+    return res.json({
+      success: true,
+      message: "Usuário removido com sucesso",
+    });
+  } catch (error) {
+    next(error);
   }
-
-  await deleteUser(id);
-
-  res.json({ message: "Usuário removido com sucesso" });
 };
 
-export const updateRole = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { role } = req.body;
+export const updateRole = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = idSchema.parse(req.params);
+    const { role } = roleSchema.parse(req.body);
 
-  if (!id || Array.isArray(id)) {
-    return res.status(400).json({ message: "ID inválido" });
+    const user = await updateUserRole(id, role);
+
+    return res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  if (!["ADMIN", "OPERATOR"].includes(role)) {
-    return res.status(400).json({ message: "Role inválida" });
-  }
-
-  const user = await updateUserRole(id, role);
-
-  res.json(user);
 };

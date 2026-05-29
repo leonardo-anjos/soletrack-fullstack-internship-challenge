@@ -21,7 +21,7 @@ const PrivateRoutes: React.FC<Props> = ({ roles }) => {
   }
 
   // 🔥 Controle de roles
-  if (roles && !roles.includes(user.role)) {
+  if (roles && !roles.includes(user.role?.toUpperCase() as any)) {
     return <Navigate to="/home" replace />;
   }
 

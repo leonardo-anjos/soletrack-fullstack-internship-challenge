@@ -1,59 +1,87 @@
-// src/controllers/shoeModel.controller.ts
 import { Request, Response, NextFunction } from "express";
 import { ShoeModelService } from "../services/shoeModel.service";
-import type { CreateShoeModelDTO } from "../services/shoeModel.service";
 import { z } from "zod";
 
 const service = new ShoeModelService();
 
+/**
+ * SCHEMAS
+ */
+const idSchema = z.object({
+  id: z.string().min(1),
+});
+
 const createSchema = z.object({
-  name: z.string().min(3),
-  category: z.string().min(2),
+  name: z.string().min(3).trim(),
+  category: z.string().min(2).trim(),
   base_cost: z.number().positive(),
 });
 
-// id agora é SAP-CATEGORY-NNN, não mais UUID
-const idSchema = z.object({ id: z.string().min(1) });
+const updateSchema = createSchema
+  .partial()
+  .refine(
+    (data) => Object.values(data).some((v) => v !== undefined),
+    { message: "Nenhum campo para atualizar." }
+  );
 
+/**
+ * CONTROLLER
+ */
 export class ShoeModelController {
-  async create(req: Request, res: Response, next: NextFunction) {
+  create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = createSchema.parse(req.body);
+
       const shoe = await service.create(data);
-      return res.status(201).json({ status: "success", data: shoe });
+
+      return res.status(201).json({
+        success: true,
+        data: shoe,
+      });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async findAll(req: Request, res: Response, next: NextFunction) {
+  findAll = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const shoes = await service.findAll();
-      return res.json({ status: "success", data: shoes });
+
+      return res.json({
+        success: true,
+        data: shoes,
+      });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async update(req: Request, res: Response, next: NextFunction) {
+  update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = idSchema.parse(req.params);
-      const updateSchema = createSchema.partial();
-      const data: Partial<CreateShoeModelDTO> = updateSchema.parse(req.body);
+      const data = updateSchema.parse(req.body);
+
       const updated = await service.update(id, data);
-      return res.json({ status: "success", message: "Modelo atualizado", data: updated });
+
+      return res.json({
+        success: true,
+        message: "Modelo atualizado",
+        data: updated,
+      });
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async delete(req: Request, res: Response, next: NextFunction) {
+  delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = idSchema.parse(req.params);
+
       await service.delete(id);
+
       return res.status(204).send();
     } catch (error) {
       next(error);
     }
-  }
+  };
 }

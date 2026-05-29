@@ -5,14 +5,23 @@ import { AppError } from "../errors/AppError";
 
 type Role = "ADMIN" | "OPERATOR";
 
-// mapeia snake_case do banco para camelCase pro frontend
+const SALT_ROUNDS = 10;
+
+type SafeUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  createdAt: Date;
+};
+
 function serializeUser(user: {
   id: string;
   name: string;
   email: string;
   role: Role;
   created_at: Date;
-}) {
+}): SafeUser {
   return {
     id: user.id,
     name: user.name,
@@ -23,43 +32,79 @@ function serializeUser(user: {
 }
 
 export interface LoginResponse {
-  user: { id: string; name: string; email: string; createdAt: Date; role: Role };
+  user: SafeUser;
   token: string;
 }
 
 export class AuthService {
-  async register(name: string, email: string, password: string, role: Role) {
-    if (!name || !email || !password || !role)
+  private async hashPassword(password: string) {
+    return bcrypt.hash(password, SALT_ROUNDS);
+  }
+
+  private async comparePassword(password: string, hash: string) {
+    return bcrypt.compare(password, hash);
+  }
+
+  async register(
+    name: string,
+    email: string,
+    password: string,
+    role: Role
+  ): Promise<SafeUser> {
+    if (!name?.trim() || !email?.trim() || !password?.trim() || !role) {
       throw new AppError("Todos os campos são obrigatórios", 400);
+    }
 
-    const userExists = await prisma.user.findUnique({ where: { email } });
-    if (userExists) throw new AppError("Este e-mail já está em uso", 400);
+    if (password.length < 6) {
+      throw new AppError("A senha deve ter pelo menos 6 caracteres", 400);
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+      const hashedPassword = await this.hashPassword(password);
 
-    const created = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        created_at: true,
-      },
-    });
+      const created = await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          password: hashedPassword,
+          role,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          created_at: true,
+        },
+      });
 
-    return serializeUser(created);
+      return serializeUser(created);
+    } catch (error: any) {
+      if (error.code === "P2002") {
+        throw new AppError("Este e-mail já está em uso", 400);
+      }
+      throw error;
+    }
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
-    if (!email || !password)
+    if (!email?.trim() || !password?.trim()) {
       throw new AppError("E-mail e senha são obrigatórios", 400);
+    }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError("E-mail ou senha inválidos", 401);
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) throw new AppError("E-mail ou senha inválidos", 401);
+    if (!user) {
+      throw new AppError("E-mail ou senha inválidos", 401);
+    }
+
+    const passwordMatch = await this.comparePassword(password, user.password);
+
+    if (!passwordMatch) {
+      throw new AppError("E-mail ou senha inválidos", 401);
+    }
 
     const token = generateToken({ id: user.id, role: user.role });
 
@@ -76,44 +121,71 @@ export class AuthService {
   }
 
   async deleteUser(id: string) {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) throw new AppError("Usuário não encontrado", 404);
+    if (!id) throw new AppError("ID inválido", 400);
 
-    return prisma.user.delete({ where: { id } });
+    try {
+      return await prisma.user.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      if (error.code === "P2025") {
+        throw new AppError("Usuário não encontrado", 404);
+      }
+      throw error;
+    }
   }
 
   async updateProfile(
     id: string,
-    data: { name?: string; email?: string; password?: string },
-  ) {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) throw new AppError("Usuário não encontrado", 404);
+    data: { name?: string; email?: string; password?: string }
+  ): Promise<SafeUser> {
+    if (!id) throw new AppError("ID inválido", 400);
 
-    if (data.email && data.email !== user.email) {
-      const emailInUse = await prisma.user.findUnique({
-        where: { email: data.email },
-      });
-      if (emailInUse) throw new AppError("Este e-mail já está em uso", 400);
+    const updateData: any = {};
+
+    if (data.name?.trim()) {
+      updateData.name = data.name.trim();
     }
 
-    const updateData: { name?: string; email?: string; password?: string } = {};
-    if (data.name) updateData.name = data.name;
-    if (data.email) updateData.email = data.email;
-    if (data.password)
-      updateData.password = await bcrypt.hash(data.password, 10);
+    if (data.email?.trim()) {
+      updateData.email = data.email.toLowerCase().trim();
+    }
 
-    const updated = await prisma.user.update({
-      where: { id },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        created_at: true,
-      },
-    });
+    if (data.password) {
+      if (data.password.length < 6) {
+        throw new AppError("A senha deve ter pelo menos 6 caracteres", 400);
+      }
+      updateData.password = await this.hashPassword(data.password);
+    }
 
-    return serializeUser(updated);
+    if (Object.keys(updateData).length === 0) {
+      throw new AppError("Nenhum dado para atualizar", 400);
+    }
+
+    try {
+      const updated = await prisma.user.update({
+        where: { id },
+        data: updateData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          created_at: true,
+        },
+      });
+
+      return serializeUser(updated);
+    } catch (error: any) {
+      if (error.code === "P2002") {
+        throw new AppError("Este e-mail já está em uso", 400);
+      }
+
+      if (error.code === "P2025") {
+        throw new AppError("Usuário não encontrado", 404);
+      }
+
+      throw error;
+    }
   }
 }

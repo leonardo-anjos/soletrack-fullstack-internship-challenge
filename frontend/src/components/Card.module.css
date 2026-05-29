@@ -1,26 +1,41 @@
 .card {
-  border-radius: 8px;
-  padding: 1.5rem;
-  background-color: var(--bg-card);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
-.accent {
-  border-top: 4px solid var(--accent);
+/* BARRA SUPERIOR COLORIDA */
+.blue {
+  border-top: 5px solid #3b82f6;
+}
+
+.orange {
+  border-top: 5px solid #f97316;
+}
+
+.green {
+  border-top: 5px solid #22c55e;
+}
+
+.purple {
+  border-top: 5px solid #a855f7;
+}
+
+.contentWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .title {
-  margin-bottom: 0.5rem;
-  color: var(--text-light);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .value {
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1e293b;
 }

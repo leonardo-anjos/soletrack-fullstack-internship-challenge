@@ -7,7 +7,7 @@ interface User {
   name: string;
   email: string;
   role: "ADMIN" | "OPERATOR";
-  createdAt: string;
+  created_at: string;
 }
 
 const Users: React.FC = () => {
@@ -18,21 +18,13 @@ const Users: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      setError("");
       const response = await api.get("/users");
-      setUsers(response.data);
-    } catch (error) {
+      setUsers(response.data.data ?? response.data);
+    } catch (err) {
       setError("Erro ao carregar usuários");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await api.delete(`/users/${id}`);
-      fetchUsers();
-    } catch (error) {
-      console.error("Erro ao excluir usuário");
     }
   };
 
@@ -40,13 +32,32 @@ const Users: React.FC = () => {
     fetchUsers();
   }, []);
 
-  if (loading) return <p>Carregando...</p>;
+  const handleDelete = async (id: string) => {
+    try {
+      await api.delete(`/users/${id}`);
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch (err) {
+      alert("Erro ao excluir usuário");
+    }
+  };
 
+  const handleChangeRole = async (id: string, role: User["role"]) => {
+    try {
+      const response = await api.patch(`/users/${id}/role`, { role });
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? (response.data.data ?? response.data) : u))
+      );
+    } catch (err) {
+      alert("Erro ao atualizar função do usuário");
+    }
+  };
+
+  if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className={styles.container}>
-      <h1>Gerenciar Usuários</h1>
+      <h1 className={styles.title}>Gerenciar Usuários</h1>
 
       <div className={styles.table}>
         <div className={styles.header}>
@@ -60,11 +71,25 @@ const Users: React.FC = () => {
           <div key={user.id} className={styles.row}>
             <span>{user.name}</span>
             <span>{user.email}</span>
-            <span>{user.role}</span>
+
+            <span>
+              <select
+                className={styles.select}
+                value={user.role}
+                onChange={(e) =>
+                  handleChangeRole(user.id, e.target.value as User["role"])
+                }
+              >
+                <option value="ADMIN">ADMIN</option>
+                <option value="OPERATOR">OPERATOR</option>
+              </select>
+            </span>
 
             <div className={styles.actions}>
-              <button>Editar</button>
-              <button onClick={() => handleDelete(user.id)}>
+              <button
+                className={styles.deleteButton}
+                onClick={() => handleDelete(user.id)}
+              >
                 Excluir
               </button>
             </div>

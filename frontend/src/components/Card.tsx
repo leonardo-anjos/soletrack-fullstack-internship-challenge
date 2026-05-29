@@ -1,28 +1,36 @@
-// src/components/Card.tsx
 import React from "react";
 import styles from "./Card.module.css";
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   value?: string | number;
-  accentColor?: boolean;
+  icon?: React.ReactNode;
+  variant?: "blue" | "orange" | "green" | "purple";
 }
 
 const Card: React.FC<CardProps> = ({
   title,
   value,
+  icon,
   children,
-  accentColor,
+  variant = "blue",
   className,
   ...rest
 }) => {
   return (
     <div
-      className={`${styles.card} ${accentColor ? styles.accent : ""} ${className || ""}`}
+      className={`${styles.card} ${styles[variant]} ${className || ""}`}
       {...rest}
     >
-      {title && <h3 className={styles.title}>{title}</h3>}
-      {value && <p className={styles.value}>{value}</p>}
+      <div className={styles.contentWrapper}>
+        <div className={styles.info}>
+          {title && <h3 className={styles.title}>{title}</h3>}
+          {value !== undefined && <p className={styles.value}>{value}</p>}
+        </div>
+
+        {icon && <div className={styles.iconContainer}>{icon}</div>}
+      </div>
+
       {children}
     </div>
   );

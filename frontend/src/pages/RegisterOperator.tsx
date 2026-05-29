@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../services/authService";
-import { useAuth } from "../hooks/useAuth";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import Input from "../components/Input";
@@ -25,7 +24,6 @@ const initialForm: RegisterForm = {
  
 const RegisterOperator: React.FC = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
  
   const [form, setForm] = useState<RegisterForm>(initialForm);
   const [loading, setLoading] = useState(false);
@@ -36,7 +34,7 @@ const RegisterOperator: React.FC = () => {
     setLoading(true);
     setStatus({ msg: "", type: "" });
     try {
-      await AuthService.register(form, token || "");
+      await AuthService.register(form);
       setStatus({ msg: "Operador registrado com sucesso!", type: "success" });
       setForm(initialForm);
     } catch (err: any) {

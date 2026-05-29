@@ -10,11 +10,13 @@ interface Column<T> {
 interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
+  rowStyle?: (row: T) => React.CSSProperties;
 }
 
 function Table<T extends Record<string, any>>({
   columns,
   data,
+  rowStyle,
 }: TableProps<T>) {
   return (
     <div className={styles.wrapper}>
@@ -30,7 +32,7 @@ function Table<T extends Record<string, any>>({
         <tbody>
           {data.length > 0 ? (
             data.map((row, i) => (
-              <tr key={i}>
+              <tr key={i} style={rowStyle ? rowStyle(row) : undefined}>
                 {columns.map((col, j) => (
                   <td key={j}>
                     {col.render
